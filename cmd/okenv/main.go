@@ -66,7 +66,7 @@ func run(arguments []string, stdin io.Reader, stdout, stderr io.Writer) error {
 		flagSet.SetOutput(&buffer)
 		flagSet.PrintDefaults()
 		flagSet.SetOutput(io.Discard)
-		return buffer.Bytes()
+		return bytes.ReplaceAll(buffer.Bytes(), []byte("\n  -"), []byte("\n  --"))
 	}
 	argumentError := func(operationError error) error { return fmt.Errorf("%w\n%s", operationError, usage()) }
 	if operationError := flagSet.Parse(arguments); operationError != nil {
