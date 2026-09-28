@@ -1,0 +1,27 @@
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - revive
+  settings:
+    revive:
+      enable-default-rules: false
+      rules:
+        - name: unused-parameter
+          arguments:
+            - allow-regex: ^_
+
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - golines
+  settings:
+    gci:
+      # 固定两组：标准库、其他所有包（包括项目内部包）。
+      sections:
+        - standard
+        - default
+    golines:
+      max-len: 120
