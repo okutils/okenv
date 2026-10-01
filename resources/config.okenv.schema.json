@@ -149,14 +149,11 @@
         }
       }
     },
-    "envOverrides": {
+    "platformOverrides": {
       "type": [
         "array",
         "null"
       ],
-      "items": {
-        "$ref": "#/$defs/envOverride"
-      },
       "allOf": [
         {
           "contains": {
@@ -270,6 +267,16 @@
         }
       ],
       "description": "Each OS/architecture pair may occur at most once in this list."
+    },
+    "envOverrides": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/platformOverrides"
+        }
+      ],
+      "items": {
+        "$ref": "#/$defs/envOverride"
+      }
     },
     "command": {
       "type": [
@@ -407,126 +414,14 @@
       "description": "Replaces the entire default execution branch; omitted execution fields are not inherited."
     },
     "scriptOverrides": {
-      "type": [
-        "array",
-        "null"
+      "allOf": [
+        {
+          "$ref": "#/$defs/platformOverrides"
+        }
       ],
       "items": {
         "$ref": "#/$defs/scriptOverride"
-      },
-      "allOf": [
-        {
-          "contains": {
-            "type": "object",
-            "required": [
-              "os",
-              "arch"
-            ],
-            "properties": {
-              "os": {
-                "const": "windows"
-              },
-              "arch": {
-                "type": "array",
-                "contains": {
-                  "const": "arm64"
-                }
-              }
-            }
-          },
-          "minContains": 0,
-          "maxContains": 1
-        },
-        {
-          "contains": {
-            "type": "object",
-            "required": [
-              "os",
-              "arch"
-            ],
-            "properties": {
-              "os": {
-                "const": "windows"
-              },
-              "arch": {
-                "type": "array",
-                "contains": {
-                  "const": "amd64"
-                }
-              }
-            }
-          },
-          "minContains": 0,
-          "maxContains": 1
-        },
-        {
-          "contains": {
-            "type": "object",
-            "required": [
-              "os",
-              "arch"
-            ],
-            "properties": {
-              "os": {
-                "const": "linux"
-              },
-              "arch": {
-                "type": "array",
-                "contains": {
-                  "const": "arm64"
-                }
-              }
-            }
-          },
-          "minContains": 0,
-          "maxContains": 1
-        },
-        {
-          "contains": {
-            "type": "object",
-            "required": [
-              "os",
-              "arch"
-            ],
-            "properties": {
-              "os": {
-                "const": "linux"
-              },
-              "arch": {
-                "type": "array",
-                "contains": {
-                  "const": "amd64"
-                }
-              }
-            }
-          },
-          "minContains": 0,
-          "maxContains": 1
-        },
-        {
-          "contains": {
-            "type": "object",
-            "required": [
-              "os",
-              "arch"
-            ],
-            "properties": {
-              "os": {
-                "const": "darwin"
-              },
-              "arch": {
-                "type": "array",
-                "contains": {
-                  "const": "arm64"
-                }
-              }
-            }
-          },
-          "minContains": 0,
-          "maxContains": 1
-        }
-      ],
-      "description": "Each OS/architecture pair may occur at most once in this list."
+      }
     },
     "script": {
       "allOf": [
