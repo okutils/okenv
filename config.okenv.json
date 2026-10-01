@@ -1,0 +1,96 @@
+{
+  "$schema": "./resources/config.okenv.schema.json",
+  "scripts": {
+    "build": {
+      "command": "go",
+      "args": ["build", "-o", "dist/local/okenv", "./cmd/okenv"],
+      "overrides": [
+        {
+          "os": "windows",
+          "arch": ["amd64", "arm64"],
+          "command": "go",
+          "args": ["build", "-o", "dist/local/okenv.exe", "./cmd/okenv"]
+        }
+      ]
+    },
+    "format": {
+      "command": "golangci-lint",
+      "args": ["fmt"]
+    },
+    "build:windows:amd64": {
+      "command": "go",
+      "args": ["build", "-o", "dist/windows/amd64/okenv.exe", "./cmd/okenv"],
+      "env": {
+        "GOOS": {
+          "value": "windows"
+        },
+        "GOARCH": {
+          "value": "amd64"
+        },
+        "CGO_ENABLED": {
+          "value": "0"
+        }
+      }
+    },
+    "build:windows:arm64": {
+      "command": "go",
+      "args": ["build", "-o", "dist/windows/arm64/okenv.exe", "./cmd/okenv"],
+      "env": {
+        "GOOS": {
+          "value": "windows"
+        },
+        "GOARCH": {
+          "value": "arm64"
+        },
+        "CGO_ENABLED": {
+          "value": "0"
+        }
+      }
+    },
+    "build:darwin:arm64": {
+      "command": "go",
+      "args": ["build", "-o", "dist/darwin/arm64/okenv", "./cmd/okenv"],
+      "env": {
+        "GOOS": {
+          "value": "darwin"
+        },
+        "GOARCH": {
+          "value": "arm64"
+        },
+        "CGO_ENABLED": {
+          "value": "0"
+        }
+      }
+    },
+    "build:linux:amd64": {
+      "command": "go",
+      "args": ["build", "-o", "dist/linux/amd64/okenv", "./cmd/okenv"],
+      "env": {
+        "GOOS": {
+          "value": "linux"
+        },
+        "GOARCH": {
+          "value": "amd64"
+        },
+        "CGO_ENABLED": {
+          "value": "0"
+        }
+      }
+    },
+    "build:linux:arm64": {
+      "command": "go",
+      "args": ["build", "-o", "dist/linux/arm64/okenv", "./cmd/okenv"],
+      "env": {
+        "GOOS": {
+          "value": "linux"
+        },
+        "GOARCH": {
+          "value": "arm64"
+        },
+        "CGO_ENABLED": {
+          "value": "0"
+        }
+      }
+    }
+  }
+}
