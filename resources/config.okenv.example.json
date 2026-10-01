@@ -1,0 +1,46 @@
+{
+  "$schema": "./config.okenv.schema.json",
+  "env": {
+    "OKENV_MESSAGE": {
+      "value": "Hello from okenv"
+    }
+  },
+  "scripts": {
+    "zsh": {
+      "description": "Show version information and open an interactive shell",
+      "command": "/usr/bin/env",
+      "args": ["zsh", "-c", "zsh --version; exec zsh -f -i"],
+      "env": {
+        "OKENV_MESSAGE": { "value": "Hello from the zsh script" },
+        "NODE_ENV": { "value": "development" },
+        "PORT": { "value": "3000" }
+      },
+      "overrides": [
+        {
+          "os": "windows",
+          "arch": ["arm64", "amd64"],
+          "command": "cmd.exe",
+          "args": ["/d", "/k", "ver"],
+          "env": {
+            "OKENV_MESSAGE": { "value": "Hello from the zsh script" },
+            "NODE_ENV": { "value": "development" },
+            "PORT": { "value": "3000" }
+          }
+        }
+      ]
+    },
+    "default": {
+      "description": "Show version information and open an interactive shell",
+      "command": "bash",
+      "args": ["-c", "bash --version; exec bash --norc -i"],
+      "overrides": [
+        {
+          "os": "windows",
+          "arch": ["arm64", "amd64"],
+          "command": "cmd.exe",
+          "args": ["/d", "/k", "ver"]
+        }
+      ]
+    }
+  }
+}

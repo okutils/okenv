@@ -1,0 +1,611 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "okenv configuration",
+  "description": "Configuration for okenv, based on the design specification and parser validation. Uses canonical lowercase field names. Unknown fields are ignored. This schema does not emulate Go duplicate-key decoding or case-insensitive struct field matching, and does not validate the selected execution plan.",
+  "type": [
+    "object",
+    "null"
+  ],
+  "properties": {
+    "env": {
+      "$ref": "#/$defs/env"
+    },
+    "scripts": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": {
+        "$ref": "#/$defs/script"
+      },
+      "description": "Exact, case-sensitive script names. Any name, including an empty name, is allowed. The implicit entry is default."
+    }
+  },
+  "$defs": {
+    "args": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "description": "Each item is one argument. A null item initially decodes to an empty string."
+    },
+    "env": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "propertyNames": {
+        "minLength": 1,
+        "pattern": "^[^=]*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/envDefinition"
+      }
+    },
+    "envDefinition": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "overrides": {
+          "$ref": "#/$defs/envOverrides"
+        }
+      },
+      "anyOf": [
+        {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "required": [
+            "overrides"
+          ],
+          "properties": {
+            "overrides": {
+              "type": "array",
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "condition": {
+      "type": "object",
+      "required": [
+        "os",
+        "arch"
+      ],
+      "properties": {
+        "os": {
+          "enum": [
+            "windows",
+            "linux",
+            "darwin"
+          ]
+        },
+        "arch": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "arm64",
+              "amd64"
+            ]
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "os": {
+                "const": "darwin"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "arch": {
+                "items": {
+                  "const": "arm64"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "envOverride": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/condition"
+        }
+      ],
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Value for this platform, expanded once from the parent environment."
+        }
+      }
+    },
+    "envOverrides": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "#/$defs/envOverride"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "windows"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "arm64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "windows"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "amd64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "linux"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "arm64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "linux"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "amd64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "darwin"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "arm64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      ],
+      "description": "Each OS/architecture pair may occur at most once in this list."
+    },
+    "command": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "command": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "args": {
+          "$ref": "#/$defs/args"
+        },
+        "ignore_error": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "description": "One group item. Missing or null command initially decodes to an empty name; selected plans reject empty names."
+    },
+    "branch": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "command": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Program name or path, expanded once from the parent environment. Empty names are rejected only when validating the selected execution plan."
+        },
+        "args": {
+          "$ref": "#/$defs/args"
+        },
+        "commands": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/command"
+          },
+          "description": "Commands executed serially. An empty array explicitly provides an empty execution branch."
+        },
+        "cwd": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Omitted or null uses the configuration directory; an explicit or expanded empty string uses the caller directory."
+        },
+        "env": {
+          "$ref": "#/$defs/env"
+        },
+        "ignore_error": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Ignore ordinary nonzero child exits only. Requires a single command."
+        }
+      },
+      "allOf": [
+        {
+          "not": {
+            "allOf": [
+              {
+                "type": "object",
+                "required": [
+                  "command"
+                ],
+                "properties": {
+                  "command": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "required": [
+                  "commands"
+                ],
+                "properties": {
+                  "commands": {
+                    "type": "array"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "not": {
+              "type": "object",
+              "required": [
+                "command"
+              ],
+              "properties": {
+                "command": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "args": {
+                "type": "null"
+              },
+              "ignore_error": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "scriptOverride": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/condition"
+        },
+        {
+          "$ref": "#/$defs/branch"
+        }
+      ],
+      "description": "Replaces the entire default execution branch; omitted execution fields are not inherited."
+    },
+    "scriptOverrides": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "#/$defs/scriptOverride"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "windows"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "arm64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "windows"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "amd64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "linux"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "arm64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "linux"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "amd64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "darwin"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "arm64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        }
+      ],
+      "description": "Each OS/architecture pair may occur at most once in this list."
+    },
+    "script": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/branch"
+        },
+        {
+          "if": {
+            "allOf": [
+              {
+                "required": [
+                  "overrides"
+                ],
+                "properties": {
+                  "overrides": {
+                    "type": "array",
+                    "minItems": 1
+                  }
+                }
+              },
+              {
+                "not": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "command"
+                      ],
+                      "properties": {
+                        "command": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "commands"
+                      ],
+                      "properties": {
+                        "commands": {
+                          "type": "array"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "then": {
+            "properties": {
+              "cwd": {
+                "type": "null"
+              },
+              "env": {
+                "type": "null"
+              },
+              "args": {
+                "type": "null"
+              },
+              "ignore_error": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "overrides": {
+          "$ref": "#/$defs/scriptOverrides"
+        }
+      }
+    }
+  }
+}
