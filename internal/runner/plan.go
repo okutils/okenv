@@ -2,8 +2,10 @@ package runner
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/okutils/okenv/internal/parser"
@@ -86,7 +88,8 @@ func build(config *parser.Config, input, name, operatingSystem, architecture str
 		environment map[string]parser.EnvDefinition
 		path        string
 	}{{environment: config.Env, path: "env"}, {environment: selectedBranch.Env, path: path + ".env"}} {
-		for entryName, definition := range layer.environment {
+		for _, entryName := range slices.Sorted(maps.Keys(layer.environment)) {
+			definition := layer.environment[entryName]
 			value := definition.Value
 			environmentPath := parser.MapPath(layer.path, entryName)
 			valuePath := environmentPath + ".value"
