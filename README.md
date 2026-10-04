@@ -200,6 +200,25 @@ okenv 不自动创建目录。`args` 中的路径由目标程序解释，不会�
 
 每条命令在独立进程中运行，执行过程中对环境变量或工作目录的修改不会传到下一条。需要共享 Shell 状态时，将相关操作放在同一次 Shell 调用或同一个脚本文件中。
 
+### 复用已有脚本
+
+如果已经定义了 `lint` 和 `test`，可以在 `commands` 中调用 `okenv --run` 来复用它们：
+
+```json
+{
+  "scripts": {
+    "check": {
+      "commands": [
+        { "command": "okenv", "args": ["--run", "lint"] },
+        { "command": "okenv", "args": ["--run", "test"] }
+      ]
+    }
+  }
+}
+```
+
+运行 `okenv --run check`，就会依次运行 `lint` 和 `test`，不用再写一遍它们的命令。
+
 ### 失败后继续
 
 在单命令脚本或命令组条目上设置 `"ignore_error": true`，可以在程序返回非零退出码后继续执行：
