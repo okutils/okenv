@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+var _ json.Unmarshaler = (*Command)(nil)
+
 func Load(path string) (*Config, error) {
 	configFile, operationError := os.Open(path)
 	if operationError != nil {
@@ -61,6 +63,22 @@ func (config *Config) Validate() error {
 	return nil
 }
 
+func (command *Command) UnmarshalJSON(data []byte) error {
+	type plainCommand Command
+	decoded := struct {
+		*plainCommand
+
+		Options Options `json:"options"`
+	}{plainCommand: (*plainCommand)(command)}
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	if decoded.Options.CheckEnv != nil {
+		return fmt.Errorf("commands entries do not support options.checkEnv")
+	}
+	return nil
+}
+
 func validateBranch(branch Branch, fieldPath string) error {
 	if branch.Command != nil && branch.Commands != nil {
 		return fmt.Errorf("%s: command and commands are mutually exclusive", fieldPath)
@@ -102,7 +120,7 @@ func MapPath(base, entryName string) string { return base + "[" + strconv.Quote(
 func validateOptions(options Options, path string) error {
 	for name, rule := range options.CheckEnv {
 		rulePath := MapPath(path+".checkEnv", name)
-		if rule.Required && rule.Enum != nil && len(rule.Enum) == 0 {
+		if rule.IsRequired && rule.Enum != nil && len(rule.Enum) == 0 {
 			return fmt.Errorf("%s: required cannot be combined with an empty enum", rulePath)
 		}
 		rule.CompiledPattern = nil
@@ -120,21 +138,6 @@ func validateOptions(options Options, path string) error {
 			rule.CompiledPattern = compiled
 		}
 		options.CheckEnv[name] = rule
-	}
-	return nil
-}
-
-func (command *Command) UnmarshalJSON(data []byte) error {
-	type plainCommand Command
-	decoded := struct {
-		*plainCommand
-		Options Options `json:"options"`
-	}{plainCommand: (*plainCommand)(command)}
-	if err := json.Unmarshal(data, &decoded); err != nil {
-		return err
-	}
-	if decoded.Options.CheckEnv != nil {
-		return fmt.Errorf("commands entries do not support options.checkEnv")
 	}
 	return nil
 }

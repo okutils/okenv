@@ -55,7 +55,7 @@ type Options struct {
 }
 
 type EnvCheck struct {
-	Required        bool           `json:"required"`
+	IsRequired      bool           `json:"required"`
 	Enum            []string       `json:"enum"`
 	Pattern         *string        `json:"pattern"`
 	CompiledPattern *regexp.Regexp `json:"-"`

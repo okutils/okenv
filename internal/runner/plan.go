@@ -173,7 +173,8 @@ func build(config *parser.Config, input, name, operatingSystem, architecture str
 		options parser.Options
 		path    string
 	}{
-		{config.Options, "options"}, {selectedBranch.Options, path + ".options"},
+		{options: config.Options, path: "options"},
+		{options: selectedBranch.Options, path: path + ".options"},
 	} {
 		if err := checkEnvironment(layer.options, layer.path, executionPlan.environment); err != nil {
 			return nil, err
@@ -203,16 +204,16 @@ func checkEnvironment(options parser.Options, path string, environment []string)
 	for _, name := range slices.Sorted(maps.Keys(options.CheckEnv)) {
 		rule := options.CheckEnv[name]
 		rulePath := parser.MapPath(path+".checkEnv", name)
-		value, exists := values[normalize(name)]
-		if rule.Required {
-			if !exists {
+		value, ok := values[normalize(name)]
+		if rule.IsRequired {
+			if !ok {
 				return fmt.Errorf("%s.required: environment variable is missing", rulePath)
 			}
 			if value == "" {
 				return fmt.Errorf("%s.required: environment variable is empty", rulePath)
 			}
 		}
-		if !exists {
+		if !ok {
 			continue
 		}
 		if rule.Enum != nil && !slices.Contains(rule.Enum, value) {
