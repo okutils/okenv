@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
+	"regexp/syntax"
 	"strconv"
 	"strings"
 )
@@ -30,13 +32,16 @@ func Load(path string) (*Config, error) {
 }
 
 func (config *Config) Validate() error {
+	if err := validateOptions(config.Options, "options"); err != nil {
+		return err
+	}
 	if operationError := validateEnv(config.Env, "env"); operationError != nil {
 		return operationError
 	}
 	for name, script := range config.Scripts {
 		fieldPath := MapPath("scripts", name)
 		if !script.HasExecution() && len(script.Overrides) > 0 &&
-			(script.Cwd != nil || script.Env != nil || script.Args != nil || script.IgnoreError != nil) {
+			(script.Cwd != nil || script.Env != nil || script.Args != nil || script.IgnoreError != nil || script.Options.CheckEnv != nil) {
 			return fmt.Errorf("%s: default execution fields have no default branch", fieldPath)
 		}
 		if operationError := validateBranch(script.Branch, fieldPath); operationError != nil {
@@ -62,6 +67,9 @@ func validateBranch(branch Branch, fieldPath string) error {
 	}
 	if branch.Command == nil && (branch.Args != nil || branch.IgnoreError != nil) {
 		return fmt.Errorf("%s: args and ignore_error require a single command", fieldPath)
+	}
+	if err := validateOptions(branch.Options, fieldPath+".options"); err != nil {
+		return err
 	}
 	return validateEnv(branch.Env, fieldPath+".env")
 }
@@ -90,3 +98,43 @@ func validateEnv(environment map[string]EnvDefinition, path string) error {
 }
 
 func MapPath(base, entryName string) string { return base + "[" + strconv.Quote(entryName) + "]" }
+
+func validateOptions(options Options, path string) error {
+	for name, rule := range options.CheckEnv {
+		rulePath := MapPath(path+".checkEnv", name)
+		if rule.Required && rule.Enum != nil && len(rule.Enum) == 0 {
+			return fmt.Errorf("%s: required cannot be combined with an empty enum", rulePath)
+		}
+		rule.CompiledPattern = nil
+		if rule.Pattern != nil {
+			// Parse independently so grouping cannot repair invalid expressions,
+			// and normalize quoted literals before adding full-value boundaries.
+			expression, err := syntax.Parse(*rule.Pattern, syntax.Perl)
+			if err != nil {
+				return fmt.Errorf("%s.pattern: %w", rulePath, err)
+			}
+			compiled, err := regexp.Compile(`\A(?:` + expression.String() + `)\z`)
+			if err != nil {
+				return fmt.Errorf("%s.pattern: %w", rulePath, err)
+			}
+			rule.CompiledPattern = compiled
+		}
+		options.CheckEnv[name] = rule
+	}
+	return nil
+}
+
+func (command *Command) UnmarshalJSON(data []byte) error {
+	type plainCommand Command
+	decoded := struct {
+		*plainCommand
+		Options Options `json:"options"`
+	}{plainCommand: (*plainCommand)(command)}
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	if decoded.Options.CheckEnv != nil {
+		return fmt.Errorf("commands entries do not support options.checkEnv")
+	}
+	return nil
+}

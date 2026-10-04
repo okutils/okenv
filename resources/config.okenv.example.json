@@ -1,5 +1,10 @@
 {
   "$schema": "./config.okenv.schema.json",
+  "options": {
+    "checkEnv": {
+      "OKENV_MESSAGE": { "required": true }
+    }
+  },
   "env": {
     "OKENV_MESSAGE": {
       "value": "Hello from okenv"
@@ -15,6 +20,12 @@
         "NODE_ENV": { "value": "development" },
         "PORT": { "value": "3000" }
       },
+      "options": {
+        "checkEnv": {
+          "NODE_ENV": { "required": true, "enum": ["development", "production"] },
+          "PORT": { "required": true, "pattern": "[0-9]+" }
+        }
+      },
       "overrides": [
         {
           "os": "windows",
@@ -25,6 +36,12 @@
             "OKENV_MESSAGE": { "value": "Hello from the zsh script" },
             "NODE_ENV": { "value": "development" },
             "PORT": { "value": "3000" }
+          },
+          "options": {
+            "checkEnv": {
+              "NODE_ENV": { "required": true, "enum": ["development", "production"] },
+              "PORT": { "required": true, "pattern": "[0-9]+" }
+            }
           }
         }
       ]

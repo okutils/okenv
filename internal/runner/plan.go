@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"maps"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 
@@ -18,11 +20,12 @@ type Context struct {
 	Branch string `json:"branch"`
 }
 type Plan struct {
-	Context  Context          `json:"context"`
-	Script   string           `json:"script"`
-	Cwd      string           `json:"cwd"`
-	Env      []string         `json:"env"`
-	Commands []parser.Command `json:"commands"`
+	environment []string
+	Context     Context          `json:"context"`
+	Script      string           `json:"script"`
+	Cwd         string           `json:"cwd"`
+	Env         []string         `json:"env"`
+	Commands    []parser.Command `json:"commands"`
 }
 
 func Select(script parser.Script, operatingSystem, architecture string) (parser.Branch, int, bool) {
@@ -76,13 +79,18 @@ func build(config *parser.Config, input, name, operatingSystem, architecture str
 			{Command: *selectedBranch.Command, Args: selectedBranch.Args, IgnoreError: shouldIgnore},
 		}
 	}
-	shouldCheckNUL := len(commands) > 0 &&
-		(operatingSystem == "windows" || operatingSystem == "linux" || operatingSystem == "darwin")
+	shouldCheckNUL := operatingSystem == "windows" || operatingSystem == "linux" || operatingSystem == "darwin"
 	check := func(value, path, what string) error {
 		if shouldCheckNUL && strings.ContainsRune(value, 0) {
 			return fmt.Errorf("%s: %s contains NUL after environment expansion", path, what)
 		}
 		return nil
+	}
+	checkExecution := func(value, path, what string) error {
+		if len(commands) == 0 {
+			return nil
+		}
+		return check(value, path, what)
 	}
 	for _, layer := range []struct {
 		environment map[string]parser.EnvDefinition
@@ -116,14 +124,18 @@ func build(config *parser.Config, input, name, operatingSystem, architecture str
 	executionPlan.Cwd = filepath.Dir(absolutePath)
 	if selectedBranch.Cwd != nil {
 		executionPlan.Cwd = os.ExpandEnv(*selectedBranch.Cwd)
-		if operationError := check(executionPlan.Cwd, path+".cwd", "working directory"); operationError != nil {
+		if operationError := checkExecution(
+			executionPlan.Cwd,
+			path+".cwd",
+			"working directory",
+		); operationError != nil {
 			return nil, operationError
 		}
 		if executionPlan.Cwd != "" && !filepath.IsAbs(executionPlan.Cwd) {
 			executionPlan.Cwd = filepath.Join(filepath.Dir(absolutePath), executionPlan.Cwd)
 		}
 	}
-	if operationError := check(executionPlan.Cwd, path+".cwd", "working directory"); operationError != nil {
+	if operationError := checkExecution(executionPlan.Cwd, path+".cwd", "working directory"); operationError != nil {
 		return nil, operationError
 	}
 	for index, command := range commands {
@@ -135,13 +147,13 @@ func build(config *parser.Config, input, name, operatingSystem, architecture str
 		if command.Command == "" {
 			return nil, fmt.Errorf("%s.command: command is empty after environment expansion", commandPath)
 		}
-		if operationError := check(command.Command, commandPath+".command", "command"); operationError != nil {
+		if operationError := checkExecution(command.Command, commandPath+".command", "command"); operationError != nil {
 			return nil, operationError
 		}
 		arguments := make([]string, len(command.Args))
 		for argumentIndex, argument := range command.Args {
 			arguments[argumentIndex] = os.ExpandEnv(argument)
-			if operationError := check(
+			if operationError := checkExecution(
 				arguments[argumentIndex],
 				fmt.Sprintf("%s.args[%d]", commandPath, argumentIndex),
 				"argument",
@@ -152,5 +164,63 @@ func build(config *parser.Config, input, name, operatingSystem, architecture str
 		command.Args = arguments
 		executionPlan.Commands = append(executionPlan.Commands, command)
 	}
+	// Let os/exec prepare PWD before applying explicit configuration, then
+	// normalize duplicates and platform-specific entries using the same API.
+	process := &exec.Cmd{Dir: executionPlan.Cwd}
+	process.Env = append(process.Environ(), executionPlan.Env...)
+	executionPlan.environment = process.Environ()
+	for _, layer := range []struct {
+		options parser.Options
+		path    string
+	}{
+		{config.Options, "options"}, {selectedBranch.Options, path + ".options"},
+	} {
+		if err := checkEnvironment(layer.options, layer.path, executionPlan.environment); err != nil {
+			return nil, err
+		}
+	}
 	return executionPlan, nil
+}
+
+func checkEnvironment(options parser.Options, path string, environment []string) error {
+	values := make(map[string]string, len(environment))
+	normalize := func(name string) string {
+		if runtime.GOOS == "windows" {
+			return strings.ToLower(name)
+		}
+		return name
+	}
+	for _, entry := range environment {
+		// os/exec permits Windows drive entries such as =C:=C:\work.
+		separator := strings.IndexByte(entry, '=')
+		if separator == 0 {
+			separator = strings.IndexByte(entry[1:], '=') + 1
+		}
+		if separator >= 0 {
+			values[normalize(entry[:separator])] = entry[separator+1:]
+		}
+	}
+	for _, name := range slices.Sorted(maps.Keys(options.CheckEnv)) {
+		rule := options.CheckEnv[name]
+		rulePath := parser.MapPath(path+".checkEnv", name)
+		value, exists := values[normalize(name)]
+		if rule.Required {
+			if !exists {
+				return fmt.Errorf("%s.required: environment variable is missing", rulePath)
+			}
+			if value == "" {
+				return fmt.Errorf("%s.required: environment variable is empty", rulePath)
+			}
+		}
+		if !exists {
+			continue
+		}
+		if rule.Enum != nil && !slices.Contains(rule.Enum, value) {
+			return fmt.Errorf("%s.enum: environment value is not in enum", rulePath)
+		}
+		if rule.CompiledPattern != nil && !rule.CompiledPattern.MatchString(value) {
+			return fmt.Errorf("%s.pattern: environment value does not fully match pattern", rulePath)
+		}
+	}
+	return nil
 }

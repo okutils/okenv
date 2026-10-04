@@ -5,6 +5,7 @@ import "slices"
 func (branch Branch) HasExecution() bool { return branch.Command != nil || branch.Commands != nil }
 
 func (branch Branch) Clone() Branch {
+	branch.Options.CheckEnv = cloneChecks(branch.Options.CheckEnv)
 	branch.Command = clonePointer(branch.Command)
 	branch.Cwd = clonePointer(branch.Cwd)
 	branch.IgnoreError = clonePointer(branch.IgnoreError)
@@ -36,4 +37,17 @@ func clonePointer[Value any](value *Value) *Value {
 	}
 	copiedValue := *value
 	return &copiedValue
+}
+
+func cloneChecks(checks map[string]EnvCheck) map[string]EnvCheck {
+	if checks == nil {
+		return nil
+	}
+	cloned := make(map[string]EnvCheck, len(checks))
+	for name, rule := range checks {
+		rule.Enum = slices.Clone(rule.Enum)
+		rule.Pattern = clonePointer(rule.Pattern)
+		cloned[name] = rule
+	}
+	return cloned
 }

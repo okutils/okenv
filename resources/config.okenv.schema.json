@@ -19,6 +19,9 @@
         "$ref": "#/$defs/script"
       },
       "description": "Exact, case-sensitive script names. Any name, including an empty name, is allowed. The implicit entry is default."
+    },
+    "options": {
+      "$ref": "#/$defs/options"
     }
   },
   "$defs": {
@@ -298,6 +301,17 @@
             "boolean",
             "null"
           ]
+        },
+        "options": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "checkEnv": {
+              "type": "null"
+            }
+          }
         }
       },
       "description": "One group item. Missing or null command initially decodes to an empty name; selected plans reject empty names."
@@ -344,6 +358,9 @@
             "null"
           ],
           "description": "Ignore ordinary nonzero child exits only. Requires a single command."
+        },
+        "options": {
+          "$ref": "#/$defs/options"
         }
       },
       "allOf": [
@@ -485,6 +502,17 @@
               },
               "ignore_error": {
                 "type": "null"
+              },
+              "options": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "checkEnv": {
+                    "type": "null"
+                  }
+                }
               }
             }
           }
@@ -501,6 +529,81 @@
           "$ref": "#/$defs/scriptOverrides"
         }
       }
+    },
+    "options": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "checkEnv": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": {
+            "$ref": "#/$defs/envCheck"
+          },
+          "description": "Checks final child environment; global and selected branch rules both apply. Names have no extra restrictions."
+        }
+      }
+    },
+    "envCheck": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "required": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Requires an existing, nonempty value; whitespace is accepted."
+        },
+        "enum": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": "Literal, case-sensitive allowed values. Empty array permits no present value; null disables this constraint."
+        },
+        "pattern": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Go regexp syntax, matching the entire literal value. Empty pattern accepts only empty values; null disables this constraint."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "required": [
+              "required"
+            ],
+            "properties": {
+              "required": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "enum": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

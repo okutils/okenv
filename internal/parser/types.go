@@ -1,8 +1,13 @@
 package parser
 
-import "github.com/okutils/okenv/internal/platform"
+import (
+	"regexp"
+
+	"github.com/okutils/okenv/internal/platform"
+)
 
 type Config struct {
+	Options Options                  `json:"options"`
 	Env     map[string]EnvDefinition `json:"env"`
 	Scripts map[string]Script        `json:"scripts"`
 }
@@ -25,6 +30,7 @@ type Command struct {
 }
 
 type Branch struct {
+	Options     Options                  `json:"options"`
 	Command     *string                  `json:"command"`
 	Args        []string                 `json:"args"`
 	Commands    []Command                `json:"commands"`
@@ -42,4 +48,15 @@ type Script struct {
 type Override struct {
 	platform.Condition
 	Branch
+}
+
+type Options struct {
+	CheckEnv map[string]EnvCheck `json:"checkEnv"`
+}
+
+type EnvCheck struct {
+	Required        bool           `json:"required"`
+	Enum            []string       `json:"enum"`
+	Pattern         *string        `json:"pattern"`
+	CompiledPattern *regexp.Regexp `json:"-"`
 }

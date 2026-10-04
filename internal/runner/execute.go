@@ -29,7 +29,7 @@ func Execute(executionPlan *Plan, stdin io.Reader, stdout, stderr io.Writer, hoo
 		}
 		process := exec.Command(command.Command, command.Args...)
 		process.Dir = executionPlan.Cwd
-		process.Env = append(process.Environ(), executionPlan.Env...)
+		process.Env = executionPlan.environment
 		process.Stdin = stdin
 		process.Stdout = stdout
 		process.Stderr = stderr
