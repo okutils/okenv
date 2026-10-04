@@ -296,7 +296,7 @@
         "args": {
           "$ref": "#/$defs/args"
         },
-        "ignore_error": {
+        "ignoreError": {
           "type": [
             "boolean",
             "null"
@@ -352,7 +352,7 @@
         "env": {
           "$ref": "#/$defs/env"
         },
-        "ignore_error": {
+        "ignoreError": {
           "type": [
             "boolean",
             "null"
@@ -411,7 +411,7 @@
               "args": {
                 "type": "null"
               },
-              "ignore_error": {
+              "ignoreError": {
                 "type": "null"
               }
             }
@@ -500,7 +500,7 @@
               "args": {
                 "type": "null"
               },
-              "ignore_error": {
+              "ignoreError": {
                 "type": "null"
               },
               "options": {

@@ -26,7 +26,7 @@ type EnvOverride struct {
 type Command struct {
 	Command     string   `json:"command"`
 	Args        []string `json:"args"`
-	IgnoreError bool     `json:"ignore_error"`
+	IgnoreError bool     `json:"ignoreError"`
 }
 
 type Branch struct {
@@ -36,7 +36,7 @@ type Branch struct {
 	Commands    []Command                `json:"commands"`
 	Cwd         *string                  `json:"cwd"`
 	Env         map[string]EnvDefinition `json:"env"`
-	IgnoreError *bool                    `json:"ignore_error"`
+	IgnoreError *bool                    `json:"ignoreError"`
 }
 
 type Script struct {

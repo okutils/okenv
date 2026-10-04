@@ -196,7 +196,7 @@ okenv 不自动创建目录。`args` 中的路径由目标程序解释，不会�
 
 默认遇到失败就停止。
 
-同一分支只能选择 `command` 或 `commands`。命令组外层的 `cwd` 和 `env` 对所有条目生效，每个条目只支持 `command`、`args`、`ignore_error`。
+同一分支只能选择 `command` 或 `commands`。命令组外层的 `cwd` 和 `env` 对所有条目生效，每个条目只支持 `command`、`args`、`ignoreError`。
 
 每条命令在独立进程中运行，执行过程中对环境变量或工作目录的修改不会传到下一条。需要共享 Shell 状态时，将相关操作放在同一次 Shell 调用或同一个脚本文件中。
 
@@ -221,7 +221,7 @@ okenv 不自动创建目录。`args` 中的路径由目标程序解释，不会�
 
 ### 失败后继续
 
-在单命令脚本或命令组条目上设置 `"ignore_error": true`，可以在程序返回非零退出码后继续执行：
+在单命令脚本或命令组条目上设置 `"ignoreError": true`，可以在程序返回非零退出码后继续执行：
 
 ```json
 {
@@ -231,7 +231,7 @@ okenv 不自动创建目录。`args` 中的路径由目标程序解释，不会�
         {
           "command": "go",
           "args": ["vet", "./..."],
-          "ignore_error": true
+          "ignoreError": true
         },
         { "command": "go", "args": ["test", "./..."] }
       ]
@@ -242,13 +242,13 @@ okenv 不自动创建目录。`args` 中的路径由目标程序解释，不会�
 
 失败被忽略时会输出提示，再继续下一条。没有其他失败时，okenv 最终返回 `0`。
 
-`ignore_error` 只处理程序启动后返回的非零退出码。配置或启动错误仍会停止执行；子进程被信号终止、Go 未返回退出码时，也会停止。
+`ignoreError` 只处理程序启动后返回的非零退出码。配置或启动错误仍会停止执行；子进程被信号终止、Go 未返回退出码时，也会停止。
 
-命令组需要逐条设置 `ignore_error`。写在外层会报错，即使值为 `false`。
+命令组需要逐条设置 `ignoreError`。写在外层会报错，即使值为 `false`。
 
 > [!NOTE]
 >
-> Windows 上，取消任务也可能被 `ignore_error: true` 忽略，详见[标准输入输出与中断行为](#标准输入输出与中断行为)。
+> Windows 上，取消任务也可能被 `ignoreError: true` 忽略，详见[标准输入输出与中断行为](#标准输入输出与中断行为)。
 
 ### 使用 Shell 语法
 
@@ -417,7 +417,7 @@ okenv --run serve
 
 运行 `okenv --run check` 即可检查 `API_TOKEN`。规则应写在脚本或命令组外层，不能写在 `commands` 的单条命令中。
 
-运行和 `--dry-run` 都会检查环境值，`--list` 不会。检查失败时返回 `125`，不启动任何命令，也不受 `ignore_error` 影响。错误会指出规则位置和原因，不显示变量实际值；预览和 verbose 的显示范围见[输出通道与敏感信息](#输出通道与敏感信息)。其他边界情况见[环境变量检查规则](#环境变量检查规则)。
+运行和 `--dry-run` 都会检查环境值，`--list` 不会。检查失败时返回 `125`，不启动任何命令，也不受 `ignoreError` 影响。错误会指出规则位置和原因，不显示变量实际值；预览和 verbose 的显示范围见[输出通道与敏感信息](#输出通道与敏感信息)。其他边界情况见[环境变量检查规则](#环境变量检查规则)。
 
 ### PATH 与程序查找
 
@@ -502,7 +502,7 @@ okenv --run serve
 | `args`                  | 不传参数                            |
 | `cwd`                   | 使用配置文件所在目录                |
 | `env`                   | 不注入脚本级变量，顶层 `env` 仍生效 |
-| `ignore_error`          | 使用 `false`                        |
+| `ignoreError`          | 使用 `false`                        |
 | `options.checkEnv`      | 不检查默认分支规则，顶层规则仍生效 |
 
 覆盖分支需要的参数、工作目录和脚本级变量，都要在覆盖项中填写。所有分支共享的变量可以放在顶层 `env`；`description` 属于脚本本身，不受覆盖项影响。
@@ -514,7 +514,7 @@ okenv --run serve
 | 环境变量 | 使用默认值             | 不注入，保留已有环境值         |
 | 脚本     | 使用默认分支           | 运行和预览报错，列表标为不可用 |
 
-只提供平台分支的脚本，默认层不要填写 `cwd`、`env`、`args`、`ignore_error` 或非 null 的 `options.checkEnv`（包括 `{}`）。如需在其他平台成功跳过，可以在默认层明确设置 `"commands": []`。
+只提供平台分支的脚本，默认层不要填写 `cwd`、`env`、`args`、`ignoreError` 或非 null 的 `options.checkEnv`（包括 `{}`）。如需在其他平台成功跳过，可以在默认层明确设置 `"commands": []`。
 
 ## 管理配置文件
 
@@ -696,11 +696,11 @@ okenv --run build -- --watch  # 不能追加程序参数；请在配置的 args 
 | `commands`     | 命令对象数组 | 串行命令组；允许空数组                           |
 | `cwd`          | 字符串       | 省略或 `null` 使用配置目录；空字符串使用调用目录 |
 | `env`          | 对象         | 当前分支的环境变量；默认无注入项                 |
-| `ignore_error` | 布尔值       | 单命令失败策略；默认 `false`                     |
+| `ignoreError` | 布尔值       | 单命令失败策略；默认 `false`                     |
 | `options.checkEnv` | 对象 | 当前执行分支的环境变量检查规则 |
 | `overrides`    | 平台分支数组 | 仅属于脚本；默认无覆盖                           |
 
-命令组条目只定义 `command`、`args` 和 `ignore_error`。外层不能填写 `args` 或 `ignore_error`，包括空数组和 `false`。未设置 `command` 时，这两个字段也只能省略或设为 `null`。
+命令组条目只定义 `command`、`args` 和 `ignoreError`。外层不能填写 `args` 或 `ignoreError`，包括空数组和 `false`。未设置 `command` 时，这两个字段也只能省略或设为 `null`。
 
 空脚本和空默认分支的区别见[空脚本与空命令组](#空脚本与空命令组)及[未匹配平台时的行为](#未匹配平台时的行为)。
 
@@ -781,7 +781,7 @@ okenv --run build -- --watch  # 不能追加程序参数；请在配置的 args 
     {
       "command": "node",
       "args": ["--version"],
-      "ignore_error": false
+      "ignoreError": false
     }
   ]
 }
@@ -810,7 +810,7 @@ okenv --run build -- --watch  # 不能追加程序参数；请在配置的 args 
 
 Ctrl+C 和外部信号由 Go 与操作系统按默认方式处理，具体结果取决于平台和终端，中断退出码不一定是 `130`。okenv 没有额外的信号转发、进程组管理或后代进程清理逻辑，退出后仍可能有子进程或后代进程在运行。需要确保整个任务停止时，请由调用方管理进程的终止和清理。
 
-Windows 上，Ctrl+C 可能产生 `0xC000013A`（某些终端显示为 `-1073741510`），okenv 不会将它统一转换为 `130`。当只有子进程终止、okenv 仍在运行时，若 Go 将其报告为非零退出码，仍按 `ignore_error` 处理：设为 `true` 就会继续执行下一条命令。
+Windows 上，Ctrl+C 可能产生 `0xC000013A`（某些终端显示为 `-1073741510`），okenv 不会将它统一转换为 `130`。当只有子进程终止、okenv 仍在运行时，若 Go 将其报告为非零退出码，仍按 `ignoreError` 处理：设为 `true` 就会继续执行下一条命令。
 
 交互式 `cmd.exe` 会话请使用 `exit` 正常退出。Ctrl+C 可能只结束 okenv，留下仍在运行的 cmd 会话。
 

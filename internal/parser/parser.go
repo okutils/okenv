@@ -84,7 +84,7 @@ func validateBranch(branch Branch, fieldPath string) error {
 		return fmt.Errorf("%s: command and commands are mutually exclusive", fieldPath)
 	}
 	if branch.Command == nil && (branch.Args != nil || branch.IgnoreError != nil) {
-		return fmt.Errorf("%s: args and ignore_error require a single command", fieldPath)
+		return fmt.Errorf("%s: args and ignoreError require a single command", fieldPath)
 	}
 	if err := validateOptions(branch.Options, fieldPath+".options"); err != nil {
 		return err

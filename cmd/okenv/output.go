@@ -124,7 +124,7 @@ func commandBody(executionPlan *runner.Plan, index int) []byte {
 			fmt.Fprintf(&buffer, "    [%d]: %s\n", argumentIndex, strconv.Quote(argument))
 		}
 	}
-	fmt.Fprintf(&buffer, "  ignore_error: %t\n", command.IgnoreError)
+	fmt.Fprintf(&buffer, "  ignoreError: %t\n", command.IgnoreError)
 	return buffer.Bytes()
 }
 
