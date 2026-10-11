@@ -166,6 +166,21 @@
           "value": "0"
         }
       }
+    },
+    "build:linux:riscv64": {
+      "command": "go",
+      "args": ["build", "-o", "dist/linux/riscv64/okenv", "./cmd/okenv"],
+      "env": {
+        "GOOS": {
+          "value": "linux"
+        },
+        "GOARCH": {
+          "value": "riscv64"
+        },
+        "CGO_ENABLED": {
+          "value": "0"
+        }
+      }
     }
   }
 }

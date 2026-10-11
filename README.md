@@ -28,7 +28,7 @@ okenv 支持在以下平台运行。配置中的 `os` 和 `arch` 也使用表中
 | 系统    | `os`      | `arch`                                  |
 | ------- | --------- | --------------------------------------- |
 | Windows | `windows` | `arm64`、`amd64`                         |
-| Linux   | `linux`   | `arm64`、`amd64`、`loong64`、`mips64`、`mips64le`     |
+| Linux   | `linux`   | `arm64`、`amd64`、`loong64`、`mips64`、`mips64le`、`riscv64`     |
 | macOS   | `darwin`  | `arm64`                                 |
 | FreeBSD | `freebsd` | `arm64`、`amd64`                         |
 

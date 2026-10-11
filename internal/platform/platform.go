@@ -31,7 +31,8 @@ func (condition Condition) Validate(seen map[string]bool) error {
 			isSupported = supportedArchitecture == "arm64" || supportedArchitecture == "amd64"
 		case "linux":
 			isSupported = supportedArchitecture == "arm64" || supportedArchitecture == "amd64" ||
-				supportedArchitecture == "loong64" || supportedArchitecture == "mips64" || supportedArchitecture == "mips64le"
+				supportedArchitecture == "loong64" || supportedArchitecture == "mips64" || supportedArchitecture == "mips64le" ||
+				supportedArchitecture == "riscv64"
 		case "darwin":
 			isSupported = supportedArchitecture == "arm64"
 		}
