@@ -79,7 +79,8 @@ func build(config *parser.Config, input, name, operatingSystem, architecture str
 			{Command: *selectedBranch.Command, Args: selectedBranch.Args, IgnoreError: shouldIgnore},
 		}
 	}
-	shouldCheckNUL := operatingSystem == "windows" || operatingSystem == "linux" || operatingSystem == "darwin"
+	shouldCheckNUL := operatingSystem == "windows" || operatingSystem == "linux" || operatingSystem == "darwin" ||
+		operatingSystem == "freebsd"
 	check := func(value, path, what string) error {
 		if shouldCheckNUL && strings.ContainsRune(value, 0) {
 			return fmt.Errorf("%s: %s contains NUL after environment expansion", path, what)

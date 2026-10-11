@@ -91,6 +91,81 @@
           "value": "0"
         }
       }
+    },
+    "build:freebsd:amd64": {
+      "command": "go",
+      "args": ["build", "-o", "dist/freebsd/amd64/okenv", "./cmd/okenv"],
+      "env": {
+        "GOOS": {
+          "value": "freebsd"
+        },
+        "GOARCH": {
+          "value": "amd64"
+        },
+        "CGO_ENABLED": {
+          "value": "0"
+        }
+      }
+    },
+    "build:freebsd:arm64": {
+      "command": "go",
+      "args": ["build", "-o", "dist/freebsd/arm64/okenv", "./cmd/okenv"],
+      "env": {
+        "GOOS": {
+          "value": "freebsd"
+        },
+        "GOARCH": {
+          "value": "arm64"
+        },
+        "CGO_ENABLED": {
+          "value": "0"
+        }
+      }
+    },
+    "build:linux:loong64": {
+      "command": "go",
+      "args": ["build", "-o", "dist/linux/loong64/okenv", "./cmd/okenv"],
+      "env": {
+        "GOOS": {
+          "value": "linux"
+        },
+        "GOARCH": {
+          "value": "loong64"
+        },
+        "CGO_ENABLED": {
+          "value": "0"
+        }
+      }
+    },
+    "build:linux:mips64": {
+      "command": "go",
+      "args": ["build", "-o", "dist/linux/mips64/okenv", "./cmd/okenv"],
+      "env": {
+        "GOOS": {
+          "value": "linux"
+        },
+        "GOARCH": {
+          "value": "mips64"
+        },
+        "CGO_ENABLED": {
+          "value": "0"
+        }
+      }
+    },
+    "build:linux:mips64le": {
+      "command": "go",
+      "args": ["build", "-o", "dist/linux/mips64le/okenv", "./cmd/okenv"],
+      "env": {
+        "GOOS": {
+          "value": "linux"
+        },
+        "GOARCH": {
+          "value": "mips64le"
+        },
+        "CGO_ENABLED": {
+          "value": "0"
+        }
+      }
     }
   }
 }

@@ -25,11 +25,12 @@ okenv 只提供 CLI，配置使用标准 JSON。默认直接运行指定程序�
 
 okenv 支持在以下平台运行。配置中的 `os` 和 `arch` 也使用表中的名称，具体用法见[跨平台配置](#跨平台配置)。
 
-| 系统    | `os`      | `arch`           |
-| ------- | --------- | ---------------- |
-| Windows | `windows` | `arm64`、`amd64` |
-| Linux   | `linux`   | `arm64`、`amd64` |
-| macOS   | `darwin`  | `arm64`          |
+| 系统    | `os`      | `arch`                                  |
+| ------- | --------- | --------------------------------------- |
+| Windows | `windows` | `arm64`、`amd64`                         |
+| Linux   | `linux`   | `arm64`、`amd64`、`loong64`、`mips64`、`mips64le`     |
+| macOS   | `darwin`  | `arm64`                                 |
+| FreeBSD | `freebsd` | `arm64`、`amd64`                         |
 
 ### 安装
 

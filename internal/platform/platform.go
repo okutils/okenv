@@ -27,8 +27,11 @@ func (condition Condition) Validate(seen map[string]bool) error {
 	for _, supportedArchitecture := range condition.Arch {
 		var isSupported bool
 		switch condition.OS {
-		case "windows", "linux":
+		case "windows", "freebsd":
 			isSupported = supportedArchitecture == "arm64" || supportedArchitecture == "amd64"
+		case "linux":
+			isSupported = supportedArchitecture == "arm64" || supportedArchitecture == "amd64" ||
+				supportedArchitecture == "loong64" || supportedArchitecture == "mips64" || supportedArchitecture == "mips64le"
 		case "darwin":
 			isSupported = supportedArchitecture == "arm64"
 		}

@@ -100,7 +100,8 @@
           "enum": [
             "windows",
             "linux",
-            "darwin"
+            "darwin",
+            "freebsd"
           ]
         },
         "arch": {
@@ -110,7 +111,10 @@
           "items": {
             "enum": [
               "arm64",
-              "amd64"
+              "amd64",
+              "loong64",
+              "mips64",
+              "mips64le"
             ]
           }
         }
@@ -129,6 +133,30 @@
               "arch": {
                 "items": {
                   "const": "arm64"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "os": {
+                "enum": [
+                  "windows",
+                  "freebsd"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "arch": {
+                "items": {
+                  "enum": [
+                    "arm64",
+                    "amd64"
+                  ]
                 }
               }
             }
@@ -261,6 +289,116 @@
                 "type": "array",
                 "contains": {
                   "const": "arm64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "freebsd"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "amd64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "freebsd"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "arm64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "linux"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "loong64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "linux"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "mips64"
+                }
+              }
+            }
+          },
+          "minContains": 0,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": [
+              "os",
+              "arch"
+            ],
+            "properties": {
+              "os": {
+                "const": "linux"
+              },
+              "arch": {
+                "type": "array",
+                "contains": {
+                  "const": "mips64le"
                 }
               }
             }
